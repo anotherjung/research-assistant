@@ -1,5 +1,6 @@
-
 Mastra Guide Research Assistant is a research assistant that uses Mastra to answer questions about academic papers and technical documents.
+
+install @mastra/core@latest @mastra/rag@latest @mastra/pg@latest ai@latest zod@latest
 
 POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/postgres
 
