@@ -19,3 +19,32 @@ const chunks = await doc.chunk({
  
 console.log("Number of chunks:", chunks.length);
 // Number of chunks: 768 text-embedding-004
+
+// Generate embeddings
+const { embeddings } = await embedMany({
+  model: google.textEmbeddingModel('text-embedding-004'),
+  values: chunks.map((chunk) => chunk.text),
+});
+
+ 
+// Get the vector store instance from Mastra
+const vectorStore = mastra.getVector('pgVectorStore'); // src/mastra/index.ts
+
+// Create an index for our paper chunks
+await vectorStore.createIndex({
+  indexName: "papers",
+  dimension: 1536,
+});
+
+
+// Store embeddings
+await vectorStore.upsert({
+  indexName: "papers",
+  vectors: embeddings,
+  metadata: chunks.map((chunk) => ({
+    text: chunk.text,
+    source: "transformer-paper",
+  })),
+});
+
+

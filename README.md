@@ -20,3 +20,5 @@ Here's a breakdown of the parameters:
 
 After chunking, models like `text-embedding-004` convert these text chunks into high-dimensional numerical vectors (embeddings). The `text-embedding-004` model, specifically from Google, outputs vectors with a default dimensionality of **768**. This means each chunk is represented by 768 numerical values, which is vital for efficient similarity searches in vector databases.
 
+
+npx bun src/store.ts
