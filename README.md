@@ -61,6 +61,9 @@ DROP TABLE IF EXISTS papers;
 **Response (after metadata filtering):**
 The inherently sequential nature of recurrent neural networks (RNNs), including Long Short-Term Memory (LSTM) and gated recurrent neural networks, presents a challenge for parallelization within training examples. This limitation becomes particularly critical with longer sequence lengths, as memory constraints restrict the ability to batch across examples.
 
+**Response (after metadata filtering with Chain-of-Thought):**
+Sequence modeling with neural networks, particularly recurrent neural networks (RNNs), faces challenges due to their inherently sequential nature. This sequential processing prevents parallelization within training examples, which becomes a critical issue with longer sequence lengths. The inability to parallelize leads to memory constraints, limiting the capacity for batching across examples during training.
+
 ### Example Interaction:
 
 **User Query**: What problems does sequence modeling face with neural networks?
@@ -83,13 +86,23 @@ Based on the provided documents, "reducing sequential computation" is a goal in 
 *   Can you explain the concept of self-attention?
 *   How does multi-head attention work?
 *   What problem does positional encoding solve in the Transformer model?
-*   What are the key advantages of the Transformer architecture compared to recurrent neural networks (RNNs) for sequence modeling tasks?
+*  
 
+**User Query**: What are the key advantages of the Transformer architecture compared to recurrent neural networks (RNNs) for sequence modeling tasks?
+
+**Response (after metadata filtering):**
 The Transformer architecture offers several key advantages over recurrent neural networks (RNNs) for sequence modeling tasks:
+  - Sole Reliance on Attention Mechanisms: Unlike RNNs, which depend on recurrence and convolutions, the Transformer is built entirely on attention mechanisms. This design simplifies the network architecture.
+  - Superior Performance: Experiments on machine translation tasks have shown that Transformer models are superior to complex recurrent or convolutional neural networks.
+  - Outperforms RNN Sequence-to-Sequence Models: The Transformer has been shown to outperform RNN sequence-to-sequence models, even when trained on smaller datasets.
 
-Sole Reliance on Attention Mechanisms: Unlike RNNs, which depend on recurrence and convolutions, the Transformer is built entirely on attention mechanisms. This design simplifies the network architecture.
-Superior Performance: Experiments on machine translation tasks have shown that Transformer models are superior to complex recurrent or convolutional neural networks.
-Outperforms RNN Sequence-to-Sequence Models: The Transformer has been shown to outperform RNN sequence-to-sequence models, even when trained on smaller datasets.
+**Response (after metadata filtering with Chain-of-Thought):**
+THOUGHT PROCESS:
+
+Step 1: The retrieved chunks consistently highlight one key advantage of the Transformer architecture: it "dispens[es] with recurrence and convolutions entirely," relying "solely on attention mechanisms." They also state that the Transformer is "superior in" performance on machine translation tasks compared to models based on recurrent or convolutional neural networks.
+Step 2: The core connection is that by eliminating recurrence and convolutions and relying entirely on attention, the Transformer achieves superior performance in sequence transduction tasks like machine translation.
+Step 3: The information directly states that the Transformer replaces RNNs and convolutions with attention mechanisms, leading to better results. The repeated phrasing across multiple chunks reinforces this as a primary advantage.
+FINAL ANSWER: The key advantage of the Transformer architecture over recurrent neural networks (RNNs) for sequence modeling tasks is that it entirely dispenses with recurrence and convolutions, relying solely on attention mechanisms. This architectural change has resulted in superior performance in tasks such as machine translation.
 
 # Vector Query Tool Creation
 Using createVectorQueryTool imported from @mastra/rag, you can create a tool that enables metadata filtering. Each vector store has its own prompt that defines the supported filter operators and syntax:
@@ -129,3 +142,39 @@ instructions: `
   If the context doesn't contain enough information to fully answer the question, please state that explicitly.
   `
   ...
+
+# demonstrate a "Chain of Thought" (CoT) system prompt for an AI agent
+
+CoT prompting is a technique used to enable large language models (LLMs) to perform complex reasoning tasks by breaking them down into intermediate steps.
+
+Here's how the provided prompt implements the Chain of Thought:
+
+1. 1.
+   Explicit Step-by-Step Guidance : The prompt clearly outlines a sequence of steps the agent must follow:
+   
+   - "First, carefully analyze the retrieved context chunks and identify key information."
+   - "Break down your thinking process about how the retrieved information relates to the query."
+   - "Explain how you're connecting different pieces from the retrieved chunks."
+   - "Draw conclusions based only on the evidence in the retrieved context."
+   - "If the retrieved chunks don't contain enough information, explicitly state what's missing."
+2. 2.
+   Structured Output Format : It dictates a specific format for the agent's response, including a "THOUGHT PROCESS" section with sub-steps and a "FINAL ANSWER" section. This forces the agent to externalize its reasoning:
+   
+   ```
+   THOUGHT PROCESS:
+   - Step 1: [Initial analysis of retrieved 
+   chunks]
+   - Step 2: [Connections between chunks]
+   - Step 3: [Reasoning based on chunks]
+   
+   FINAL ANSWER:
+   [Your concise answer based on the retrieved 
+   context]
+   ```
+3. 3.
+   Emphasis on Justification : Phrases like "Explain how you're connecting different pieces" and "Remember: Explain how you're using the retrieved information to reach your conclusions" reinforce the need for the agent to show its work, not just provide a final answer.
+Purpose of Chain of Thought Prompting:
+
+- Improved Reasoning : By guiding the agent through a logical sequence of steps, CoT prompts help LLMs perform better on tasks requiring multi-step reasoning, arithmetic, and symbolic manipulation.
+- Transparency and Debugging : The explicit thought process makes the agent's reasoning transparent, allowing developers to understand how the agent arrived at its conclusion and to debug issues more effectively.
+- Reduced Hallucinations : By instructing the agent to base answers only on provided context and to state explicitly when information is missing, CoT can help reduce the likelihood of the agent generating incorrect or unsupported information.

@@ -19,7 +19,21 @@ export const researchAgent = new Agent({
     "  \"excerptKeywords\": \"string\"\n" +
     "}\n" +
     "```\n\n" +
-    "You should use the `excerptKeywords` field for filtering when appropriate.",  
+    "You should use the `excerptKeywords` field for filtering when appropriate.\n\n" +
+    "Follow these Chain of Thought steps for each response:\n" +
+    "1. First, carefully analyze the retrieved context chunks and identify key information.\n" +
+    "2. Break down your thinking process about how the retrieved information relates to the query.\n" +
+    "3. Explain how you're connecting different pieces from the retrieved chunks.\n" +
+    "4. Draw conclusions based only on the evidence in the retrieved context.\n" +
+    "5. If the retrieved chunks don't contain enough information, explicitly state what's missing.\n\n" +
+    "Format your response as:\n" +
+    "THOUGHT PROCESS:\n" +
+    "- Step 1: [Initial analysis of retrieved chunks]\n" +
+    "- Step 2: [Connections between chunks]\n" +
+    "- Step 3: [Reasoning based on chunks]\n\n" +
+    "FINAL ANSWER:\n" +
+    "[Your concise answer based on the retrieved context]\n\n" +
+    "Remember: Explain how you're using the retrieved information to reach your conclusions.",
   model: google("gemini-2.5-flash"),
   tools: {
     vectorQueryTool,
