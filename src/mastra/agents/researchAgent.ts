@@ -6,7 +6,7 @@ import { createVectorQueryTool } from "@mastra/rag";
 const vectorQueryTool = createVectorQueryTool({
   vectorStoreName: "pgVector",
   indexName: "papers",
-  model: google.embedding("text-embedding-3-small"),
+  model: google.textEmbeddingModel('text-embedding-004'),
 });
  
 export const researchAgent = new Agent({
