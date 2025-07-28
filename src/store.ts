@@ -15,6 +15,9 @@ const chunks = await doc.chunk({
   size: 512,
   overlap: 50,
   separator: "\n",
+  extract: {
+    keywords: true, // Extracts keywords from each chunk
+  },
 });
  
 console.log("Number of chunks:", chunks.length);
@@ -62,6 +65,7 @@ await vectorStore.upsert({
   metadata: chunks.map((chunk) => ({
     text: chunk.text,
     source: "transformer-paper",
+    excerptKeywords: chunk.metadata.excerptKeywords,
   })),
 });
 console.log("Upsert complete.");

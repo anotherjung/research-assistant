@@ -9,7 +9,7 @@ This script loads an academic paper, processes it into chunks, generates embeddi
 ### Key Steps:
 - **Load Paper**: Fetch HTML content from arXiv (e.g., Transformer paper).
 - **Chunking**: Use `MDocument.fromText` and recursive chunking (size: 512, overlap: 50).
-- **Embeddings**: Generate using Google `text-embedding-004` with `taskType: 'RETRIEVAL_DOCUMENT'` for optimized document retrieval. Process in batches of 100 to handle API limits.
+- **Embeddings**: Generate using Google `text-embedding-004` with `taskType: 'RETRIEVAL_DOCUMENT'` for optimized document retrieval. Process in batches of 100 to handle API limits. Each chunk's metadata now includes `excerptKeywords` for enhanced filtering.
 - **Vector Store**: Use `mastra.getVector('pgVectorStore')` to create an index (`papers`, dimension 768) and upsert vectors with metadata.
 
 **Run Command**: `npx bun src/store.ts` (Ensure `POSTGRES_CONNECTION_STRING` is set).
@@ -22,7 +22,7 @@ Defines the `Research Assistant` agent with a vector query tool for semantic sea
 
 ### Key Components:
 - **Vector Query Tool**: The `vectorQueryTool` is now defined in <mcfile name="vector-query-tool.ts" path="src/mastra/tools/vector-query-tool.ts"></mcfile> and imported into `researchAgent.ts`. It is configured with `vectorStoreName: 'pgVectorStore'`, index `papers`, and query model `text-embedding-004` (`taskType: 'RETRIEVAL_QUERY'`).
-- **Agent Setup**: Uses `gemini-2.5-flash` model. Instructions mandate using the tool with `queryText` (extracted from user prompt) and `topK` (default 5). Responses based solely on tool results.
+- **Agent Setup**: Uses `gemini-2.5-flash` model. Instructions mandate using the tool with `queryText` (extracted from user prompt) and `topK` (default 5). Responses based solely on tool results. The agent is now aware of the `excerptKeywords` in the metadata for filtering purposes.
 
 **Integration**: Export the agent for registration in Mastra.
 
