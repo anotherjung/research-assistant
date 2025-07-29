@@ -3,6 +3,7 @@ import { Mastra } from '@mastra/core/mastra';
 import { PinoLogger } from '@mastra/loggers';
 import { LibSQLStore } from '@mastra/libsql';
 import { weatherWorkflow } from './workflows/weather-workflow';
+import { researchWorkflow } from './workflows/research-workflow';
 import { weatherAgent } from './agents/weather-agent';
 
 import { PgVector } from '@mastra/pg';
@@ -13,7 +14,7 @@ const pgVectorStore = new PgVector({
 });
 
 export const mastra = new Mastra({
-  workflows: { weatherWorkflow },
+  workflows: { weatherWorkflow, researchWorkflow },
   agents: { weatherAgent, researchAgent },
   vectors: { pgVectorStore }, //vectors
   storage: new LibSQLStore({
