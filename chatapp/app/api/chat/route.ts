@@ -9,13 +9,58 @@ const AVAILABLE_AGENTS = {
 
 type AgentType = keyof typeof AVAILABLE_AGENTS;
 
+// Weather query detection keywords
+const WEATHER_KEYWORDS = [
+  'weather', 'temperature', 'forecast', 'rain', 'sunny', 'cloudy', 'storm', 
+  'humidity', 'wind', 'celsius', 'fahrenheit', 'climate', 'meteorology',
+  'outdoor activities', 'plan activities', 'weekend plan', 'weather report'
+];
+
+function detectWeatherQuery(messages: any[]): boolean {
+  if (!messages || !Array.isArray(messages)) return false;
+  
+  const lastMessage = messages[messages.length - 1];
+  if (!lastMessage || !lastMessage.content) return false;
+  
+  // Handle both string and array content formats
+  let content: string;
+  if (Array.isArray(lastMessage.content)) {
+    content = lastMessage.content
+      .filter((part: any) => part.type === 'text')
+      .map((part: any) => part.text)
+      .join(' ');
+  } else if (typeof lastMessage.content === 'string') {
+    content = lastMessage.content;
+  } else {
+    return false;
+  }
+  
+  return WEATHER_KEYWORDS.some(keyword => content.toLowerCase().includes(keyword.toLowerCase()));
+}
+
 export async function POST(req: Request) {
   try {
     const { messages, agent = 'researchAgent' } = await req.json();
     
+    console.log('[API Route] Request received:', { 
+      agent, 
+      messageCount: messages?.length || 0,
+      lastMessage: messages?.[messages.length - 1]?.content 
+    });
+    
+    // Auto-detect weather queries
+    const isWeatherQuery = detectWeatherQuery(messages);
+    const selectedAgent = isWeatherQuery ? 'weatherAgent' : agent;
+    
+    console.log('[API Route] Agent selection:', { 
+      originalAgent: agent, 
+      detectedWeather: isWeatherQuery, 
+      finalAgent: selectedAgent 
+    });
+    
     // Validate agent selection
-    const selectedAgent = agent as AgentType;
-    if (!AVAILABLE_AGENTS[selectedAgent]) {
+    const validatedAgent = selectedAgent as AgentType;
+    if (!AVAILABLE_AGENTS[validatedAgent]) {
       return new Response(
         JSON.stringify({ error: `Invalid agent: ${agent}. Available agents: ${Object.keys(AVAILABLE_AGENTS).join(', ')}` }),
         { 
@@ -25,14 +70,21 @@ export async function POST(req: Request) {
       );
     }
 
+    // Transform messages to include required role field
+    const transformedMessages = messages.map((msg: any) => ({
+      ...msg,
+      role: msg.role || 'user' // Default to 'user' role if not specified
+    }));
+
     // Forward request to selected Mastra agent
-    const response = await fetch(AVAILABLE_AGENTS[selectedAgent], {
+    console.log('[API Route] Forwarding to agent:', validatedAgent);
+    const response = await fetch(AVAILABLE_AGENTS[validatedAgent], {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
         'Accept': 'text/plain'
       },
-      body: JSON.stringify({ messages })
+      body: JSON.stringify({ messages: transformedMessages })
     });
 
     if (!response.ok) {
@@ -50,9 +102,13 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    console.error('API route error:', error);
+    console.error('[API Route] Error:', error);
+    console.error('[API Route] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
     return new Response(
-      JSON.stringify({ error: 'Failed to process request' }),
+      JSON.stringify({ 
+        error: 'Failed to process request',
+        details: error instanceof Error ? error.message : String(error)
+      }),
       { 
         status: 500,
         headers: { 'Content-Type': 'application/json' }

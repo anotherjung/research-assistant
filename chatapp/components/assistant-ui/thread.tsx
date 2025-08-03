@@ -73,8 +73,11 @@ const AgentSelector: FC = () => {
         <div className="flex gap-1">
           <Button
             variant={selectedAgent === 'researchAgent' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedAgent('researchAgent')}
+              size="sm"
+            onClick={() => {
+              console.log('[UI] Research agent selected');
+              setSelectedAgent('researchAgent');
+            }}
             className="h-8 px-3 text-xs"
           >
             <BotIcon className="h-3 w-3 mr-1" />
@@ -83,7 +86,10 @@ const AgentSelector: FC = () => {
           <Button
             variant={selectedAgent === 'weatherAgent' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setSelectedAgent('weatherAgent')}
+            onClick={() => {
+              console.log('[UI] Weather agent selected');
+              setSelectedAgent('weatherAgent');
+            }}
             className="h-8 px-3 text-xs"
           >
             <CloudIcon className="h-3 w-3 mr-1" />

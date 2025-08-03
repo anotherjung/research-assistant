@@ -14,8 +14,14 @@ const pgVectorStore = new PgVector({
 });
 
 export const mastra = new Mastra({
-  workflows: { weatherWorkflow, researchWorkflow },
-  agents: { weatherAgent, researchAgent },
+  workflows: { 
+    weatherWorkflow, // Handles weather-related tasks
+    researchWorkflow // Handles research tasks
+  },
+  agents: {
+    weatherAgent, // Specialized for weather queries
+    researchAgent // Specialized for research queries
+  },
   vectors: { pgVectorStore }, //vectors
   storage: new LibSQLStore({
     // stores telemetry, evals, ... into memory storage, if it needs to persist, change to file:../mastra.db

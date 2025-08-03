@@ -36,33 +36,50 @@ export const weatherTool = createTool({
     conditions: z.string().describe('Weather conditions description'),
     location: z.string().describe('Location name'),
   }),
-  execute: async ({ inputData }) => {
-    if (!inputData?.location) {
+  execute: async ({ context }) => {
+    console.log('[weather-tool] Starting execution with context:', JSON.stringify(context, null, 2));
+    
+    // Handle both direct input and nested inputData structure
+    const location = context.location || context.inputData?.location;
+    if (!location) {
+      console.error('[weather-tool] Error: No location provided');
       throw new Error('Location is required');
     }
     
-    return await getWeather(inputData.location);
+    console.log('[weather-tool] Getting weather for location:', location);
+    const result = await getWeather(location);
+    console.log('[weather-tool] Weather result:', JSON.stringify(result, null, 2));
+    return result;
   },
 });
 
 const getWeather = async (location: string) => {
   try {
+    console.log('[weather-tool:getWeather] Processing location:', location);
+    
     const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1`;
+    console.log('[weather-tool:getWeather] Geocoding URL:', geocodingUrl);
+    
     const geocodingResponse = await fetch(geocodingUrl);
     const geocodingData = (await geocodingResponse.json()) as GeocodingResponse;
+    console.log('[weather-tool:getWeather] Geocoding response:', JSON.stringify(geocodingData, null, 2));
 
     if (!geocodingData.results?.[0]) {
+      console.error('[weather-tool:getWeather] Location not found:', location);
       throw new Error(`Location '${location}' not found`);
     }
 
     const { latitude, longitude, name } = geocodingData.results[0];
+    console.log('[weather-tool:getWeather] Found coordinates:', { latitude, longitude, name });
 
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_gusts_10m,weather_code`;
+    console.log('[weather-tool:getWeather] Weather API URL:', weatherUrl);
 
     const response = await fetch(weatherUrl);
     const data = (await response.json()) as WeatherResponse;
+    console.log('[weather-tool:getWeather] Weather data:', JSON.stringify(data, null, 2));
 
-    return {
+    const result = {
       temperature: Math.round(data.current.temperature_2m * 10) / 10,
       feelsLike: Math.round(data.current.apparent_temperature * 10) / 10,
       humidity: data.current.relative_humidity_2m,
@@ -71,9 +88,12 @@ const getWeather = async (location: string) => {
       conditions: getWeatherCondition(data.current.weather_code),
       location: name,
     };
+    
+    console.log('[weather-tool:getWeather] Final weather result:', JSON.stringify(result, null, 2));
+    return result;
   } catch (error) {
     console.error('Weather API error:', error);
-    throw new Error(`Failed to get weather for ${location}: ${error.message}`);
+    throw new Error(`Failed to get weather for ${location}: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 

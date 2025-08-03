@@ -29,6 +29,12 @@ export const useAppAgent = () => {
 
 export const Assistant = () => {
   const [selectedAgent, setSelectedAgent] = useState<AgentType>('researchAgent');
+  
+  // Enhanced agent selection with logging
+  const handleAgentChange = (agent: AgentType) => {
+    console.log('[App Context] Agent changing from', selectedAgent, 'to', agent);
+    setSelectedAgent(agent);
+  };
 
   // Create runtime with dynamic agent selection
   const runtime = useChatRuntime({
@@ -37,12 +43,18 @@ export const Assistant = () => {
       agent: selectedAgent, // Dynamic agent selection
     }),
     onError: (error) => {
-      console.error('Chat runtime error:', error);
+      console.error('[Runtime] Chat runtime error:', error);
+    },
+    onResponse: (response) => {
+      console.log('[Runtime] API response received:', response.status, response.statusText);
+    },
+    onFinish: (message) => {
+      console.log('[Runtime] Stream finished:', message);
     }
   });
 
   return (
-    <AppAgentContext.Provider value={{ selectedAgent, setSelectedAgent }}>
+    <AppAgentContext.Provider value={{ selectedAgent, setSelectedAgent: handleAgentChange }}>
       <AssistantRuntimeProvider runtime={runtime}>
         <SidebarProvider>
           <AppSidebar />
